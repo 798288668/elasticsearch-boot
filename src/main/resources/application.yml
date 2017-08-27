@@ -1,0 +1,22 @@
+logging:
+  file: logs/oath2-sso.log
+  level:
+    root: info
+
+server:
+  port: 8888
+
+spring:
+  application:
+    name: resource-server
+  aop:
+    proxy-target-class: true
+
+
+#Cluster node port configuration
+  data:
+    elasticsearch:
+      cluster-name: elasticsearch
+      cluster-nodes: localhost:9300
+      repositories:
+        enabled: true
