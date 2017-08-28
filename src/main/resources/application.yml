@@ -7,8 +7,6 @@ server:
   port: 8888
 
 spring:
-  application:
-    name: resource-server
   aop:
     proxy-target-class: true
 
@@ -16,7 +14,7 @@ spring:
 #Cluster node port configuration
   data:
     elasticsearch:
-      cluster-name: elasticsearch
-      cluster-nodes: localhost:9300
+      cluster-name: elasticsearch_cc
+      cluster-nodes: 127.0.0.1:9300
       repositories:
         enabled: true
