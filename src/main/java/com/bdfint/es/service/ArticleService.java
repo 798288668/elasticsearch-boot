@@ -3,16 +3,22 @@ package com.bdfint.es.service;
 import com.alibaba.fastjson.JSON;
 import com.bdfint.es.bean.Article;
 import com.bdfint.es.dao.ArticleRepository;
-import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class ArticleService {
@@ -20,10 +26,12 @@ public class ArticleService {
     private static final Logger logger = LoggerFactory.getLogger(ArticleService.class);
 
     private final ArticleRepository articleRepository;
+    private final ElasticsearchTemplate elasticsearchTemplate;
 
     @Autowired
-    public ArticleService(ArticleRepository articleRepository) {
+    public ArticleService(ArticleRepository articleRepository, ElasticsearchTemplate elasticsearchTemplate) {
         this.articleRepository = articleRepository;
+        this.elasticsearchTemplate = elasticsearchTemplate;
     }
 
     public void initData() {
@@ -39,10 +47,63 @@ public class ArticleService {
     }
 
     public String search(Integer pageNo, Integer pageSize, String searchContent) {
-        QueryBuilder queryBuilde = QueryBuilders.multiMatchQuery(searchContent, "name", "content");
 
+        SearchRequestBuilder builder = elasticsearchTemplate.getClient().prepareSearch("article_index");
+        builder.setTypes("article");
+        builder.setFrom(pageNo);
+        builder.setSize(pageSize);
+        //设置查询类型：1.SearchType.DFS_QUERY_THEN_FETCH 精确查询； 2.SearchType.SCAN 扫描查询,无序
+        builder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
+        // 设置查询关键词
+        builder.setQuery(QueryBuilders.multiMatchQuery(searchContent, "title", "content"));
 
-        Iterable<Article> result = articleRepository.search(queryBuilde);
+        //设置是否按查询匹配度排序
+        builder.setExplain(true);
+        //设置高亮显示
+        HighlightBuilder highlightBuilder = new HighlightBuilder().field("*").requireFieldMatch(false);
+        highlightBuilder.preTags("<span style=\"color:red\">");
+        highlightBuilder.postTags("</span>");
+        builder.highlighter(highlightBuilder);
+
+        //执行搜索,返回搜索响应信息
+        SearchResponse searchResponse = builder.get();
+        SearchHits searchHits = searchResponse.getHits();
+
+        //总命中数
+        long total = searchHits.getTotalHits();
+        Map<String, Object> map = new HashMap<>();
+        SearchHit[] hits = searchHits.getHits();
+        map.put("count", total);
+        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        for (SearchHit hit : hits) {
+            //highlightFields.size=0??
+            Map<String, HighlightField> highlightFields = hit.getHighlightFields();
+
+            //title高亮
+            HighlightField titleField = highlightFields.get("title");
+            Map<String, Object> source = hit.getSource();
+            if (titleField != null) {
+                Text[] fragments = titleField.fragments();
+                StringBuilder title = new StringBuilder();
+                for (Text text : fragments) {
+                    title.append(text);
+                }
+                source.put("title", title.toString());
+            }
+
+            //describe高亮
+            HighlightField contentField = highlightFields.get("content");
+            if (contentField != null) {
+                Text[] fragments = contentField.fragments();
+                StringBuilder content = new StringBuilder();
+                for (Text text : fragments) {
+                    content.append(text);
+                }
+                source.put("content", content.toString());
+            }
+            list.add(source);
+        }
+        map.put("dataList", list);
 
 //        // 分页参数
 //        Pageable pageable = new PageRequest(pageNo, pageSize);
@@ -67,7 +128,7 @@ public class ArticleService {
 //        Page<Article> result = articleRepository.search(searchQuery);
 
 
-        return JSON.toJSONString(result);
+        return JSON.toJSONString(map);
     }
 
 
