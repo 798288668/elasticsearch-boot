@@ -1,5 +1,7 @@
 package com.bdfint.es.bean;
 
+import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -17,8 +19,13 @@ public class Article implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
+    @NotEmpty
     private String id;
+    @NotEmpty
+    @Length(min = 2, max = 16, message = "标题长度必须介于 2 和 16 之间")
     private String title; // 标题
+    @NotEmpty
+    @Length(min = 2, max = 2000, message = "内容长度必须介于 2 和 2000 之间")
     private String content; // 内容
     private String keywords; // 关键字
     private Long hits; // 点击数

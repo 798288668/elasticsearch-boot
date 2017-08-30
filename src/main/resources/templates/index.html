@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" href="animate.css">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.css">
+    <script src="jquery/jquery-2.1.4.min.js"></script>
+    <script src="bootstrap/js/bootstrap.js"></script>
+
+    <link rel="stylesheet" href="/static/animate.css">
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.css">
+    <script src="/static/jquery/jquery-2.1.4.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.js"></script>
+
+    <title>首页</title>
+    <style>
+        .entry-title {
+            font-size: 24px;
+            line-height: 32px;
+        }
+
+        .entry-common .entry-title, .page .entry-title {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /*列表文章图片*/
+        .entry-content img, .entry-summary img, .comment-content img, .widget img, .page-content img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+    <script>
+
+    </script>
+</head>
+<body>
+<div class="container" style="margin: 20px;">
+    <div class="col-lg-8">
+        <form id="search" class="form-group" th:action="@{/search}">
+            <input type="hidden" name="pageNo" value="0">
+            <input type="hidden" name="pageSize" value="100">
+            <div class="input-group" style="margin-bottom: 20px;">
+                <input class="form-control input-lg" title="searchContent" name="searchContent">
+                <span class="input-group-addon btn btn-primary">搜索</span>
+            </div>
+            <article class="well clearfix" th:each="list:${result.dataList}">
+                <header class="entry-header">
+                    <h1 class="entry-title" th:text="${list.title}">输入关键字进行搜索</h1>
+                </header>
+                <div class="entry-summary" th:text="${list.content}">
+                </div>
+                <footer>
+                </footer>
+            </article>
+        </form>
+
+    </div>
+</div>
+</body>
+</html>

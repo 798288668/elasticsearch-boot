@@ -1,8 +1,9 @@
 package com.bdfint.es.service;
 
-import com.alibaba.fastjson.JSON;
 import com.bdfint.es.bean.Article;
+import com.bdfint.es.common.Result;
 import com.bdfint.es.dao.ArticleRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -34,29 +35,33 @@ public class ArticleService {
         this.elasticsearchTemplate = elasticsearchTemplate;
     }
 
-    public void initData() {
+    public Result initData() {
         List<Article> articleList = new ArrayList<>();
         articleList.add(new Article("1", "我们", "我还清晰地记得那天我们坐在江边聊天的情境", "关键词", 0L, new Date()));
         articleList.add(new Article("2", "我们", "我记得我们聊天的情境", "关键词", 0L, new Date()));
-        articleList.add(new Article("2", "我们", "我们聊天的情境", "关键词", 0L, new Date()));
+        articleList.add(new Article("3", "我们", "我们聊天的情境", "关键词", 0L, new Date()));
         articleRepository.saveAll(articleList);
+        return Result.of("init success!");
     }
 
-    public void save(Article article) {
+    public Result save(Article article) {
         articleRepository.save(article);
+        return Result.of("save success!");
     }
 
-    public String search(Integer pageNo, Integer pageSize, String searchContent) {
+    public Map<String, Object> search(Integer pageNo, Integer pageSize, String searchContent) {
 
+        //方案一：
         SearchRequestBuilder builder = elasticsearchTemplate.getClient().prepareSearch("article_index");
         builder.setTypes("article");
         builder.setFrom(pageNo);
         builder.setSize(pageSize);
         //设置查询类型：1.SearchType.DFS_QUERY_THEN_FETCH 精确查询； 2.SearchType.SCAN 扫描查询,无序
         builder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
-        // 设置查询关键词
-        builder.setQuery(QueryBuilders.multiMatchQuery(searchContent, "title", "content"));
-
+        //设置查询关键词
+        if (StringUtils.isNotEmpty(searchContent)) {
+            builder.setQuery(QueryBuilders.multiMatchQuery(searchContent, "title", "content"));
+        }
         //设置是否按查询匹配度排序
         builder.setExplain(true);
         //设置高亮显示
@@ -74,11 +79,9 @@ public class ArticleService {
         Map<String, Object> map = new HashMap<>();
         SearchHit[] hits = searchHits.getHits();
         map.put("count", total);
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> list = new ArrayList<>();
         for (SearchHit hit : hits) {
-            //highlightFields.size=0??
             Map<String, HighlightField> highlightFields = hit.getHighlightFields();
-
             //title高亮
             HighlightField titleField = highlightFields.get("title");
             Map<String, Object> source = hit.getSource();
@@ -91,7 +94,7 @@ public class ArticleService {
                 source.put("title", title.toString());
             }
 
-            //describe高亮
+            //content高亮
             HighlightField contentField = highlightFields.get("content");
             if (contentField != null) {
                 Text[] fragments = contentField.fragments();
@@ -128,7 +131,7 @@ public class ArticleService {
 //        Page<Article> result = articleRepository.search(searchQuery);
 
 
-        return JSON.toJSONString(map);
+        return map;
     }
 
 
