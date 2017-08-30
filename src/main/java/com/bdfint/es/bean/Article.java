@@ -19,16 +19,22 @@ public class Article implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @NotEmpty
     private String id;
+
     @NotEmpty
     @Length(min = 2, max = 16, message = "标题长度必须介于 2 和 16 之间")
+    @Field(store = true, analyzer = "ik_max_word", searchAnalyzer = "ik_max_word", type = FieldType.text)
     private String title; // 标题
+
     @NotEmpty
     @Length(min = 2, max = 2000, message = "内容长度必须介于 2 和 2000 之间")
+    @Field(store = true, analyzer = "ik_max_word", searchAnalyzer = "ik_max_word", type = FieldType.text)
     private String content; // 内容
+
     private String keywords; // 关键字
+
     private Long hits; // 点击数
+
     @Field(format = DateFormat.date_time, index = false, store = true, type = FieldType.Long)
     private Date createDate; // 创建日期
 

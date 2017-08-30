@@ -2,10 +2,10 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
-    <link rel="stylesheet" href="animate.css">
-    <link rel="stylesheet" href="bootstrap/css/bootstrap.css">
-    <script src="jquery/jquery-2.1.4.min.js"></script>
-    <script src="bootstrap/js/bootstrap.js"></script>
+    <link rel="stylesheet" th:href="@{animate.css}">
+    <link rel="stylesheet" th:href="@{bootstrap/css/bootstrap.css}">
+    <script th:src="@{jquery/jquery-2.1.4.min.js}"></script>
+    <script th:src="@{bootstrap/js/bootstrap.js}"></script>
 
     <link rel="stylesheet" href="/static/animate.css">
     <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.css">
@@ -24,38 +24,104 @@
             text-align: center;
         }
 
-        /*列表文章图片*/
         .entry-content img, .entry-summary img, .comment-content img, .widget img, .page-content img {
             max-width: 100%;
             height: auto;
         }
+
+        textarea {
+            resize: none;
+        }
     </style>
     <script>
+        $(function () {
+            $('#init').on('click', function () {
+                var $btn = $(this).button('loading');
+                $.ajax({
+                    url: '/article/init',
+                    async: false,
+                    dataType: 'json',
+                    type: 'get',
+                    data: '',
+                    success: function (data, textStatus) {
+                        alert('初始化数据完成！');
+                    }
+                });
+                $btn.button('reset')
+            });
 
+            $('#addBtn').on('click', function () {
+                var $btn = $(this).button('loading');
+                $.ajax({
+                    url: '/article/save',
+                    async: false,
+                    type: 'post',
+                    data: $('#addData').serialize(),
+                    success: function (data, textStatus) {
+                        alert('提交成功！');
+                    },
+                    error: function (request) {
+                        alert("提交失败");
+                    }
+                });
+                $btn.button('reset')
+            });
+        });
     </script>
 </head>
 <body>
-<div class="container" style="margin: 20px;">
-    <div class="col-lg-8">
+<div class="container" style="margin-top: 20px;">
+    <div class="col-lg-7">
         <form id="search" class="form-group" th:action="@{/search}">
             <input type="hidden" name="pageNo" value="0">
             <input type="hidden" name="pageSize" value="100">
             <div class="input-group" style="margin-bottom: 20px;">
-                <input class="form-control input-lg" title="searchContent" name="searchContent">
-                <span class="input-group-addon btn btn-primary">搜索</span>
+                <input class="form-control input-lg" title="searchContent" name="searchContent"
+                       th:value="${searchContent}">
+                <span class="input-group-addon btn btn-primary" onclick="$('#search').submit();">搜索</span>
             </div>
-            <article class="well clearfix" th:each="list:${result.dataList}">
-                <header class="entry-header">
-                    <h1 class="entry-title" th:text="${list.title}">输入关键字进行搜索</h1>
-                </header>
-                <div class="entry-summary" th:text="${list.content}">
-                </div>
-                <footer>
-                </footer>
-            </article>
+            <div class="animated zoomIn">
+                <article class="well clearfix" th:each="list:${result}">
+                    <header class="entry-header">
+                        <h1 class="entry-title" th:utext="${list?.title}"></h1>
+                    </header>
+                    <div class="entry-summary" th:utext="${list?.content}">
+                    </div>
+                    <footer>
+                    </footer>
+                </article>
+            </div>
         </form>
-
     </div>
+    <div class="col-lg-5">
+        <div class="col-lg-offset-1">
+            <form id="addData" class="form-horizontal">
+                <div class="form-group">
+                    <label for="title" class="col-sm-2 control-label"></label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" name="title" id="title" placeholder="标题">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="content" class="col-sm-2 control-label"></label>
+                    <div class="col-sm-10">
+                        <textarea rows="6" class="form-control" name="content" id="content" placeholder="内容"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <span id="addBtn" class="btn btn-default">提交</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="input-group col-lg-offset-6" style="margin-top: 40px;">
+            <button type="button" id="init" class="btn">
+                初始化数据
+            </button>
+        </div>
+    </div>
+
 </div>
 </body>
 </html>

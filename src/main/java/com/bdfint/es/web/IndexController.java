@@ -1,5 +1,6 @@
 package com.bdfint.es.web;
 
+import com.bdfint.es.bean.Article;
 import com.bdfint.es.common.BaseParam;
 import com.bdfint.es.common.Result;
 import com.bdfint.es.service.ArticleService;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,16 +31,16 @@ public class IndexController {
     }
 
     @RequestMapping("/")
-    public String index(ModelMap map) {
-        map.addAttribute("host", "http://blog.didispace.com");
+    public String index() {
         return "index";
     }
 
     @RequestMapping(value = "/search", method = RequestMethod.GET)
     public String search(@Valid BaseParam baseParam, Model model) throws Exception {
-        Map<String, Object> search = articleService.search(baseParam.getPageNo(), baseParam.getPageSize(),
+        List<Article> articleList = articleService.search(baseParam.getPageNo(), baseParam.getPageSize(),
                 baseParam.getSearchContent());
-        model.addAttribute("result", search);
+        model.addAttribute("searchContent", baseParam.getSearchContent());
+        model.addAttribute("result", articleList);
         return "index";
     }
 }

@@ -3,6 +3,7 @@ package com.bdfint.es.service;
 import com.bdfint.es.bean.Article;
 import com.bdfint.es.common.Result;
 import com.bdfint.es.dao.ArticleRepository;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -36,6 +38,7 @@ public class ArticleService {
     }
 
     public Result initData() {
+        articleRepository.deleteAll();
         List<Article> articleList = new ArrayList<>();
         articleList.add(new Article("1", "我们", "我还清晰地记得那天我们坐在江边聊天的情境", "关键词", 0L, new Date()));
         articleList.add(new Article("2", "我们", "我记得我们聊天的情境", "关键词", 0L, new Date()));
@@ -44,13 +47,31 @@ public class ArticleService {
         return Result.of("init success!");
     }
 
-    public Result save(Article article) {
+    public Result save(Article article) throws IOException {
+        article.setId(UUID.randomUUID().toString().replaceAll("-", ""));
         articleRepository.save(article);
+
+//        new XContentFactory();
+//        XContentBuilder builder = XContentFactory.jsonBuilder()
+//                .startObject()
+//                .startObject("article_index")
+//                .startObject("properties")
+//                .startObject("id").field("type", "string").field("store", "yes").endObject()
+//                .startObject("title").field("type", "string").field("store", "yes")
+//                .field("indexAnalyzer", "ik_max_word").field("searchAnalyzer", "ik").endObject()
+//                .startObject("content").field("type", "string").field("store", "yes")
+//                .field("indexAnalyzer", "ik_max_word").field("searchAnalyzer", "ik").endObject()
+//                .endObject()
+//                .endObject()
+//                .endObject();
+//        PutMappingRequest mapping = Requests.putMappingRequest("article_index").type("article").source(builder);
+//        elasticsearchTemplate.getClient().admin().indices().putMapping(mapping).actionGet();
+
         return Result.of("save success!");
     }
 
-    public Map<String, Object> search(Integer pageNo, Integer pageSize, String searchContent) {
 
+    public List<Article> search(Integer pageNo, Integer pageSize, String searchContent) {
         //方案一：
         SearchRequestBuilder builder = elasticsearchTemplate.getClient().prepareSearch("article_index");
         builder.setTypes("article");
@@ -74,24 +95,24 @@ public class ArticleService {
         SearchResponse searchResponse = builder.get();
         SearchHits searchHits = searchResponse.getHits();
 
-        //总命中数
-        long total = searchHits.getTotalHits();
-        Map<String, Object> map = new HashMap<>();
         SearchHit[] hits = searchHits.getHits();
-        map.put("count", total);
-        List<Map<String, Object>> list = new ArrayList<>();
+        List<Article> list = Lists.newArrayList();
+        Article article;
         for (SearchHit hit : hits) {
             Map<String, HighlightField> highlightFields = hit.getHighlightFields();
             //title高亮
             HighlightField titleField = highlightFields.get("title");
             Map<String, Object> source = hit.getSource();
+            article = new Article();
             if (titleField != null) {
                 Text[] fragments = titleField.fragments();
                 StringBuilder title = new StringBuilder();
                 for (Text text : fragments) {
                     title.append(text);
                 }
-                source.put("title", title.toString());
+                article.setTitle(title.toString());
+            } else {
+                article.setTitle(source.get("title").toString());
             }
 
             //content高亮
@@ -102,11 +123,14 @@ public class ArticleService {
                 for (Text text : fragments) {
                     content.append(text);
                 }
-                source.put("content", content.toString());
+                article.setContent(content.toString());
+            } else {
+                article.setContent(source.get("content").toString());
             }
-            list.add(source);
+            if (titleField != null || contentField != null) {
+                list.add(article);
+            }
         }
-        map.put("dataList", list);
 
 //        // 分页参数
 //        Pageable pageable = new PageRequest(pageNo, pageSize);
@@ -131,7 +155,7 @@ public class ArticleService {
 //        Page<Article> result = articleRepository.search(searchQuery);
 
 
-        return map;
+        return list;
     }
 
 

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/article")
@@ -35,8 +35,8 @@ public class ArticleController {
 
     @RequestMapping(value = "/search", method = RequestMethod.GET)
     public Result search(@Valid BaseParam baseParam) throws Exception {
-        Map<String, Object> search = articleService.search(baseParam.getPageNo(), baseParam.getPageSize(),
+        List<Article> articleList = articleService.search(baseParam.getPageNo(), baseParam.getPageSize(),
                 baseParam.getSearchContent());
-        return Result.of(search);
+        return Result.of(articleList);
     }
 }
