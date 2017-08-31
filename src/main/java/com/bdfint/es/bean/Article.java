@@ -1,5 +1,6 @@
 package com.bdfint.es.bean;
 
+import com.bdfint.es.common.Global;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.annotation.Id;
@@ -13,7 +14,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 @Component
-@Document(indexName = "article_index", type = "article")
+@Document(indexName = Global.INDEX_ARTICLE, type = Global.TYPE_ARTICLE)
 public class Article implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -23,12 +24,12 @@ public class Article implements Serializable {
 
     @NotEmpty
     @Length(min = 2, max = 16, message = "标题长度必须介于 2 和 16 之间")
-    @Field(store = true, analyzer = "ik_max_word", searchAnalyzer = "ik_max_word", type = FieldType.text)
+    @Field(store = true, analyzer = Global.IK_MAX_WORD, searchAnalyzer = Global.IK_MAX_WORD, type = FieldType.text)
     private String title; // 标题
 
     @NotEmpty
     @Length(min = 2, max = 2000, message = "内容长度必须介于 2 和 2000 之间")
-    @Field(store = true, analyzer = "ik_max_word", searchAnalyzer = "ik_max_word", type = FieldType.text)
+    @Field(store = true, analyzer = Global.IK_MAX_WORD, searchAnalyzer = Global.IK_MAX_WORD, type = FieldType.text)
     private String content; // 内容
 
     private String keywords; // 关键字

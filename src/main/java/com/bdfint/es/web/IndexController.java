@@ -2,19 +2,15 @@ package com.bdfint.es.web;
 
 import com.bdfint.es.bean.Article;
 import com.bdfint.es.common.BaseParam;
-import com.bdfint.es.common.Result;
 import com.bdfint.es.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.validation.Valid;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author fengcheng
