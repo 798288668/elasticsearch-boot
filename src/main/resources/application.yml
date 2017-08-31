@@ -1,5 +1,5 @@
 logging:
-  file: logs/oath2-sso.log
+  file: logs/elasticsearch-boot.log
   level:
     root: info
 
@@ -9,6 +9,8 @@ server:
 spring:
   aop:
     proxy-target-class: true
+  mvc:
+    static-path-pattern: /static/**
 
   thymeleaf:
     cache: false
