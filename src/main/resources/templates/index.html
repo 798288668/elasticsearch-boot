@@ -38,8 +38,12 @@
                     dataType: 'json',
                     type: 'get',
                     data: '',
-                    success: function (data, textStatus) {
-                        alert('初始化数据完成！');
+                    success: function (data) {
+                        if (data.code === "0") {
+                            alert(data.message);
+                        } else {
+                            alert(data.data);
+                        }
                     }
                 });
                 $btn.button('reset')
@@ -52,11 +56,12 @@
                     async: false,
                     type: 'post',
                     data: $('#addData').serialize(),
-                    success: function (data, textStatus) {
-                        alert('提交成功！');
-                    },
-                    error: function (request) {
-                        alert("提交失败");
+                    success: function (data) {
+                        if (data.code === "0") {
+                            alert(data.message);
+                        } else {
+                            alert(data.data);
+                        }
                     }
                 });
                 $btn.button('reset')
@@ -68,7 +73,7 @@
 <div class="container" style="margin-top: 20px;">
     <div class="col-lg-7">
         <form id="search" class="form-group" th:action="@{/search}">
-            <input type="hidden" name="pageNo" value="0">
+            <input type="hidden" name="pageNo" value="1">
             <input type="hidden" name="pageSize" value="100">
             <div class="input-group" style="margin-bottom: 20px;">
                 <input class="form-control input-lg" title="searchContent" name="searchContent"
@@ -109,9 +114,7 @@
             </form>
         </div>
         <div class="input-group" style="margin-top: 40px;">
-            <button type="button" id="init" class="btn">
-                初始化数据
-            </button>
+            <button type="button" id="init" class="btn">初始化数据</button>
         </div>
     </div>
 

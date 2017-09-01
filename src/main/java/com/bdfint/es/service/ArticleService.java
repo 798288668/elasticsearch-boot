@@ -4,15 +4,14 @@ import com.bdfint.es.bean.Article;
 import com.bdfint.es.common.Global;
 import com.bdfint.es.common.Result;
 import com.bdfint.es.dao.ArticleRepository;
+import com.bdfint.es.util.BeanMapper;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.common.text.Text;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.slf4j.Logger;
@@ -81,95 +80,76 @@ public class ArticleService {
     }
 
 
+    /**
+     * 分页搜索
+     *
+     * @param pageNo        页码
+     * @param pageSize      每页显示数量
+     * @param searchContent 搜索内容
+     * @return 结果集
+     */
     public List<Article> search(Integer pageNo, Integer pageSize, String searchContent) {
+        String[] searchFields = {"title", "content"};
 
         //方案一：
         SearchRequestBuilder builder = elasticsearchTemplate.getClient().prepareSearch(Global.INDEX_ARTICLE);
         builder.setTypes(Global.TYPE_ARTICLE);
-        builder.setFrom(pageNo);
+        builder.setFrom(pageNo - 1);
         builder.setSize(pageSize);
         //设置查询类型：1.SearchType.DFS_QUERY_THEN_FETCH 精确查询； 2.SearchType.SCAN 扫描查询,无序
         builder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
         //设置查询关键词
         if (StringUtils.isNotEmpty(searchContent)) {
-            builder.setQuery(QueryBuilders.multiMatchQuery(searchContent, "title", "content"));
+            builder.setQuery(QueryBuilders.multiMatchQuery(searchContent, searchFields));
         }
         //设置是否按查询匹配度排序
         builder.setExplain(true);
         //设置高亮显示
         HighlightBuilder highlightBuilder = new HighlightBuilder().field("*").requireFieldMatch(false);
-        highlightBuilder.preTags("<span style=\"color:red\">");
-        highlightBuilder.postTags("</span>");
+        highlightBuilder.preTags(Global.PRE_TAGS_RED);
+        highlightBuilder.postTags(Global.POST_TAGS_RED);
         builder.highlighter(highlightBuilder);
 
         //执行搜索,返回搜索响应信息
         SearchResponse searchResponse = builder.get();
-        SearchHits searchHits = searchResponse.getHits();
 
-        SearchHit[] hits = searchHits.getHits();
-        List<Article> list = Lists.newArrayList();
-        Article article;
-        for (SearchHit hit : hits) {
-            Map<String, HighlightField> highlightFields = hit.getHighlightFields();
-            //title高亮
-            HighlightField titleField = highlightFields.get("title");
+        //对结果集进行高亮
+        List<Article> chunk = Lists.newArrayList();
+        for (SearchHit hit : searchResponse.getHits()) {
             Map<String, Object> source = hit.getSource();
-            article = new Article();
-            if (titleField != null) {
-                Text[] fragments = titleField.fragments();
-                StringBuilder title = new StringBuilder();
-                for (Text text : fragments) {
-                    title.append(text);
+            for (String highName : searchFields) {
+                HighlightField highlightField = hit.getHighlightFields().get(highName);
+                if (highlightField != null) {
+                    String highValue = highlightField.fragments()[0].toString();
+                    source.put(highName, highValue);
                 }
-                article.setTitle(title.toString());
-            } else {
-                article.setTitle(source.get("title").toString());
             }
-
-            //content高亮
-            HighlightField contentField = highlightFields.get("content");
-            if (contentField != null) {
-                Text[] fragments = contentField.fragments();
-                StringBuilder content = new StringBuilder();
-                for (Text text : fragments) {
-                    content.append(text);
-                }
-                article.setContent(content.toString());
-            } else {
-                article.setContent(source.get("content").toString());
-            }
-            if (titleField != null || contentField != null) {
-                list.add(article);
-            }
+            chunk.add(BeanMapper.map(source, Article.class));
         }
 
-
         // 方案二
-        /*QueryBuilder builder = QueryBuilders.multiMatchQuery(searchContent, "title", "content");
+        /*QueryBuilder builder = QueryBuilders.multiMatchQuery(searchContent, searchFields);
         FunctionScoreQueryBuilder functionScoreQueryBuilder = QueryBuilders.functionScoreQuery(builder);
-        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
 
-        List<String> heightFields = Lists.newArrayList("title", "content");
-        HighlightBuilder.Field[] hfields = new HighlightBuilder.Field[heightFields.size()];
-        for (int i = 0; i < heightFields.size(); i++) {
-            hfields[i] = new HighlightBuilder.Field(heightFields.get(i)).preTags("<span style=\"color:red\">").postTags("</span>").fragmentSize(250);
+        HighlightBuilder.Field[] hfields = new HighlightBuilder.Field[searchFields.length];
+        for (int i = 0; i < searchFields.length; i++) {
+            hfields[i] = new HighlightBuilder.Field(searchFields[i])
+                    .preTags(Global.PRE_TAGS_RED)
+                    .postTags(Global.POST_TAGS_RED);
         }
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withPageable(pageable)
                 .withQuery(functionScoreQueryBuilder)
                 .withHighlightFields(hfields)
                 .build();
-        //Page<Article> result = articleRepository.search(searchQuery);
         Page<Article> result = elasticsearchTemplate.queryForPage(searchQuery, Article.class, new SearchResultMapper() {
             @Override
             public <T> AggregatedPage<T> mapResults(SearchResponse response, Class<T> clazz, Pageable pageable) {
                 List<T> chunk = Lists.newArrayList();
                 for (SearchHit searchHit : response.getHits()) {
-                    if (response.getHits().getHits().length <= 0) {
-                        return null;
-                    }
                     Map<String, Object> entityMap = searchHit.getSource();
-                    for (String highName : heightFields) {
+                    for (String highName : searchFields) {
                         HighlightField highlightField = searchHit.getHighlightFields().get(highName);
                         if (highlightField != null) {
                             String highValue = highlightField.fragments()[0].toString();
@@ -178,14 +158,10 @@ public class ArticleService {
                     }
                     chunk.add(BeanMapper.map(entityMap, clazz));
                 }
-                if (chunk.size() > 0) {
-                    return new AggregatedPageImpl<>(chunk);
-                }
-                return null;
+                return new AggregatedPageImpl<>(chunk);
             }
         });*/
-
-        return list;
+        return chunk;
     }
 
 
