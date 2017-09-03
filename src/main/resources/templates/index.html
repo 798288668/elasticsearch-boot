@@ -2,10 +2,10 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
-    <link rel="stylesheet" href="/static/animate.css">
-    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.css">
-    <script src="/static/jquery/jquery-2.1.4.min.js"></script>
-    <script src="/static/bootstrap/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="../static/animate.css">
+    <link rel="stylesheet" href="../static/bootstrap/css/bootstrap.css">
+    <script src="../static/jquery/jquery-2.1.4.min.js"></script>
+    <script src="../static/bootstrap/js/bootstrap.js"></script>
 
     <title>首页</title>
     <style>
@@ -80,7 +80,7 @@
                        th:value="${searchContent}">
                 <span class="input-group-addon btn btn-primary" onclick="$('#search').submit();">搜索</span>
             </div>
-            <div class="animated zoomIn">
+            <div class="animated zoomIn" >
                 <article class="well clearfix" th:each="list:${result}">
                     <header class="entry-header">
                         <h1 class="entry-title" th:utext="${list?.title}"></h1>
