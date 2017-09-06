@@ -8,10 +8,10 @@
 
 ### 安装elasticsearch
 ```
-* $ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.1.zip
-* $ unzip elasticsearch-5.5.1.zip
-* $ cd elasticsearch-5.5.1/
-* $ ./bin/elasticsearch
+$ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.1.zip
+$ unzip elasticsearch-5.5.1.zip
+$ cd elasticsearch-5.5.1/
+$ ./bin/elasticsearch
 ```
 
 ```
