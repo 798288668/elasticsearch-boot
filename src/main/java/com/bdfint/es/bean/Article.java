@@ -14,7 +14,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 @Component
-@Document(indexName = Global.INDEX_ARTICLE, type = Global.TYPE_ARTICLE)
+@Document(indexName = Global.INDEX_BOOT, type = Global.TYPE_ARTICLE)
 public class Article implements Serializable {
 
     private static final long serialVersionUID = 1L;

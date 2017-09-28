@@ -31,14 +31,22 @@ public class Global {
     public static final String FALSE = "false";
 
 
-    /** es */
+    /**
+     * es
+     */
     public static final String IK_MAX_WORD = "ik_max_word";
-    public static final String INDEX_ARTICLE = "index_article";
+    public static final String IK_SMART = "ik_smart";
+    public static final String STANDARD = "standard";
+    public static final String INDEX_BOOT = "index_boot";
     public static final String TYPE_ARTICLE = "article";
 
-    /** the custom opening tag  */
+    /**
+     * the custom opening tag
+     */
     public static final String[] PRE_TAGS_RED = new String[]{"<span style=\"color:red\">"};
-    /** the custom closing tag  */
+    /**
+     * the custom closing tag
+     */
     public static final String[] POST_TAGS_RED = new String[]{"</span>"};
 
 }

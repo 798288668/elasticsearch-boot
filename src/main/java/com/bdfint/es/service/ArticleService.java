@@ -7,6 +7,9 @@ import com.bdfint.es.dao.ArticleRepository;
 import com.bdfint.es.util.BeanMapper;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeAction;
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequestBuilder;
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -89,14 +92,17 @@ public class ArticleService {
      * @return 结果集
      */
     public List<Article> search(Integer pageNo, Integer pageSize, String searchContent) {
+        List<String> terms = getAnalyzeSearchTerms(searchContent);
+        System.out.println(terms);
+
         String[] searchFields = {"title", "content"};
 
         //方案一：
-        SearchRequestBuilder builder = elasticsearchTemplate.getClient().prepareSearch(Global.INDEX_ARTICLE);
+        SearchRequestBuilder builder = elasticsearchTemplate.getClient().prepareSearch(Global.INDEX_BOOT);
         builder.setTypes(Global.TYPE_ARTICLE);
         builder.setFrom(pageNo - 1);
         builder.setSize(pageSize);
-        //设置查询类型：1.SearchType.DFS_QUERY_THEN_FETCH 精确查询； 2.SearchType.SCAN 扫描查询,无序
+        //设置查询类型：1.SearchType.DFS_QUERY_THEN_FETCH 精确查询；
         builder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
         //设置查询关键词
         if (StringUtils.isNotEmpty(searchContent)) {
@@ -126,8 +132,10 @@ public class ArticleService {
             }
             chunk.add(BeanMapper.map(source, Article.class));
         }
+        return chunk;
 
         // 方案二
+        //QueryBuilder builder = QueryBuilders.queryStringQuery(searchContent);
         /*QueryBuilder builder = QueryBuilders.multiMatchQuery(searchContent, searchFields);
         FunctionScoreQueryBuilder functionScoreQueryBuilder = QueryBuilders.functionScoreQuery(builder);
         Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
@@ -160,9 +168,22 @@ public class ArticleService {
                 }
                 return new AggregatedPageImpl<>(chunk);
             }
-        });*/
-        return chunk;
+        });
+        return result.getContent();*/
     }
 
+
+    /**
+     * 调用 ES 获取 IK 分词后结果
+     */
+    private List<String> getAnalyzeSearchTerms(String searchContent) {
+        AnalyzeRequestBuilder request = new AnalyzeRequestBuilder(elasticsearchTemplate.getClient(),
+                AnalyzeAction.INSTANCE, Global.INDEX_BOOT, searchContent);
+        request.setTokenizer(Global.IK_MAX_WORD);
+        List<AnalyzeResponse.AnalyzeToken> tokenList = request.execute().actionGet().getTokens();
+        List<String> searchTermList = new ArrayList<>();
+        tokenList.forEach(ikToken -> searchTermList.add(ikToken.getTerm()));
+        return searchTermList;
+    }
 
 }
