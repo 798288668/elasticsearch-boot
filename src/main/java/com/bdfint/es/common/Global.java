@@ -36,6 +36,7 @@ public class Global {
      */
     public static final String IK_MAX_WORD = "ik_max_word";
     public static final String IK_SMART = "ik_smart";
+    public static final String PINYIN = "pinyin";
     public static final String STANDARD = "standard";
     public static final String INDEX_BOOT = "index_boot";
     public static final String TYPE_ARTICLE = "article";

@@ -23,12 +23,12 @@ public class Article implements Serializable {
     private String id;
 
     @NotEmpty
-    @Length(min = 2, max = 16, message = "标题长度必须介于 2 和 16 之间")
+    @Length(min = 1, max = 50, message = "标题长度必须介于 1 和 50 之间")
     @Field(store = true, analyzer = Global.IK_MAX_WORD, searchAnalyzer = Global.IK_MAX_WORD, type = FieldType.text)
     private String title; // 标题
 
     @NotEmpty
-    @Length(min = 2, max = 2000, message = "内容长度必须介于 2 和 2000 之间")
+    @Length(min = 1, max = 2000, message = "内容长度必须介于 1 和 2000 之间")
     @Field(store = true, analyzer = Global.IK_MAX_WORD, searchAnalyzer = Global.IK_MAX_WORD, type = FieldType.text)
     private String content; // 内容
 
