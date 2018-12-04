@@ -4,7 +4,7 @@ logging:
     root: info
 
 server:
-  port: 8888
+  port: 9999
 
 spring:
   aop:
@@ -18,7 +18,7 @@ spring:
 #Cluster node port configuration
   data:
     elasticsearch:
-      cluster-name: elasticsearch_fengcheng
+      cluster-name: elasticsearch
       cluster-nodes: 127.0.0.1:9300
       repositories:
         enabled: true

@@ -1,4 +1,4 @@
-package com.bdfint.es;
+package com.cheng.es;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,8 +1,8 @@
-package com.bdfint.es.web;
+package com.cheng.es.web;
 
-import com.bdfint.es.bean.Article;
-import com.bdfint.es.common.BaseParam;
-import com.bdfint.es.service.ArticleService;
+import com.cheng.es.bean.Article;
+import com.cheng.es.common.BaseParam;
+import com.cheng.es.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

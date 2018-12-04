@@ -1,10 +1,10 @@
-package com.bdfint.es.service;
+package com.cheng.es.service;
 
-import com.bdfint.es.bean.Article;
-import com.bdfint.es.common.Global;
-import com.bdfint.es.common.Result;
-import com.bdfint.es.dao.ArticleRepository;
-import com.bdfint.es.util.BeanMapper;
+import com.cheng.es.bean.Article;
+import com.cheng.es.common.Global;
+import com.cheng.es.common.Result;
+import com.cheng.es.dao.ArticleRepository;
+import com.cheng.es.util.BeanMapper;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeAction;
@@ -15,8 +15,8 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.elasticsearch.search.highlight.HighlightBuilder;
+import org.elasticsearch.search.highlight.HighlightField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +72,7 @@ public class ArticleService {
                 "关键词", 0L, new Date()));
         articleList.add(new Article("12", "欢喜", "见了他，她变得很低很低，低到尘埃里。但她心里是欢喜的，" +
                 "从尘埃里开出花来。", "关键词", 0L, new Date()));
-        articleRepository.saveAll(articleList);
+		articleRepository.save(articleList);
         return Result.of("init success!");
     }
 
@@ -135,7 +135,9 @@ public class ArticleService {
         HighlightBuilder highlightBuilder = new HighlightBuilder().field("*").requireFieldMatch(false);
         highlightBuilder.preTags(Global.PRE_TAGS_RED);
         highlightBuilder.postTags(Global.POST_TAGS_RED);
-        builder.highlighter(highlightBuilder);
+		builder.setHighlighterPreTags(Global.PRE_TAGS_RED);
+		builder.setHighlighterPostTags(Global.POST_TAGS_RED);
+		builder.addHighlightedField("*").setHighlighterRequireFieldMatch(false);
 
         //执行搜索,返回搜索响应信息
         SearchResponse searchResponse = builder.get();
@@ -159,7 +161,7 @@ public class ArticleService {
         //QueryBuilder builder = QueryBuilders.queryStringQuery(searchContent);
         /*QueryBuilder builder = QueryBuilders.multiMatchQuery(searchContent, searchFields);
         FunctionScoreQueryBuilder functionScoreQueryBuilder = QueryBuilders.functionScoreQuery(builder);
-        Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
+        Pageable pageable = new PageRequest(pageNo - 1, pageSize);
 
         HighlightBuilder.Field[] hfields = new HighlightBuilder.Field[searchFields.length];
         for (int i = 0; i < searchFields.length; i++) {

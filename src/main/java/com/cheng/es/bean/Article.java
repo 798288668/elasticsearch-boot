@@ -1,13 +1,10 @@
-package com.bdfint.es.bean;
+package com.cheng.es.bean;
 
-import com.bdfint.es.common.Global;
+import com.cheng.es.common.Global;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.*;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -24,19 +21,19 @@ public class Article implements Serializable {
 
     @NotEmpty
     @Length(min = 1, max = 50, message = "标题长度必须介于 1 和 50 之间")
-    @Field(store = true, analyzer = Global.IK_MAX_WORD, searchAnalyzer = Global.IK_MAX_WORD, type = FieldType.text)
+	@Field(store = true, analyzer = Global.IK_MAX_WORD, searchAnalyzer = Global.IK_MAX_WORD, type = FieldType.String)
     private String title; // 标题
 
     @NotEmpty
     @Length(min = 1, max = 2000, message = "内容长度必须介于 1 和 2000 之间")
-    @Field(store = true, analyzer = Global.IK_MAX_WORD, searchAnalyzer = Global.IK_MAX_WORD, type = FieldType.text)
+	@Field(store = true, analyzer = Global.IK_MAX_WORD, searchAnalyzer = Global.IK_MAX_WORD, type = FieldType.String)
     private String content; // 内容
 
     private String keywords; // 关键字
 
     private Long hits; // 点击数
 
-    @Field(format = DateFormat.date_time, index = false, store = true, type = FieldType.Long)
+	@Field(format = DateFormat.date_time, index = FieldIndex.not_analyzed, store = true, type = FieldType.Long)
     private Date createDate; // 创建日期
 
     public Article() {

@@ -1,8 +1,8 @@
 /*
- * Copyright &copy; <a href="http://www.zsteel.cc">zsteel</a> All rights reserved.
+ * Copyright &copy; <a href="http://www.lufengc.cc">lufengc</a> All rights reserved.
  */
 
-package com.bdfint.es.util;
+package com.cheng.es.util;
 
 import org.apache.commons.lang3.time.DateFormatUtils;
 

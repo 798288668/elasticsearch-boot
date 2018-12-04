@@ -2,7 +2,7 @@
  * Copyright (c) 2017. <a href="http://www.lufengc.com">lufengc</a> All rights reserved.
  */
 
-package com.bdfint.es.common;
+package com.cheng.es.common;
 
 /**
  * 全局常量
@@ -39,7 +39,7 @@ public class Global {
     public static final String PINYIN = "pinyin";
     public static final String STANDARD = "standard";
     public static final String INDEX_BOOT = "index_boot";
-    public static final String TYPE_ARTICLE = "article";
+	public static final String TYPE_ARTICLE = "type_article";
 
     /**
      * the custom opening tag

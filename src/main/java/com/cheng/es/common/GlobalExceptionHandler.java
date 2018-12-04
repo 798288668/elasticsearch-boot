@@ -1,4 +1,4 @@
-package com.bdfint.es.common;
+package com.cheng.es.common;
 
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;

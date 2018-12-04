@@ -2,7 +2,7 @@
  * Copyright (c) 2017. <a href="http://www.lufengc.com">lufengc</a> All rights reserved.
  */
 
-package com.bdfint.es.config;
+package com.cheng.es.config;
 
 import org.springframework.context.annotation.Configuration;
 

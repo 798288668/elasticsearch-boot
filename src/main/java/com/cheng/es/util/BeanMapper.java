@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2017. <a href="http://www.lufengc.com">lufengc</a> All rights reserved.
  */
-package com.bdfint.es.util;
+package com.cheng.es.util;
 
 import com.google.common.collect.Lists;
 import org.dozer.DozerBeanMapper;

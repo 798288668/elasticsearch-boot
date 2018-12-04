@@ -1,6 +1,6 @@
-package com.bdfint.es.dao;
+package com.cheng.es.dao;
 
-import com.bdfint.es.bean.Article;
+import com.cheng.es.bean.Article;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 import org.springframework.stereotype.Repository;
 
